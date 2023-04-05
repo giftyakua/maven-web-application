@@ -1,0 +1,24 @@
+node{
+    def mavenHome = tool name: 'maven3.9.1'
+    stage('1.gitclone'){
+      git 'https://github.com/giftyakua/maven-web-application'  
+    }
+    stage('2.build'){
+        sh "${mavenHome}/bin/mvn package"
+    }
+    stage('3.codeanalysis'){
+        sh "${mavenHome}/bin/mvn sonar:sonar" 
+}
+stage('4.upload-to-nexus'){
+        sh "${mavenHome}/bin/mvn deploy" 
+}
+stage('5.upload-to-tomcat'){
+deploy adapters: [tomcat9(credentialsId: 'MrTomCred', path: '', url: 'http://54.237.37.230:8177/')], contextPath: null, war: 'target/*.war'
+}
+stage('6.awaiting-approval'){
+    input 'Project is ready to deploy, Please review and approve'
+}
+stage('7.upload-to-tomcat'){
+deploy adapters: [tomcat9(credentialsId: 'MrTomCred', path: '', url: 'http://54.237.37.230:8177/')], contextPath: null, war: 'target/*.war'
+}
+}
